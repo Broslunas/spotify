@@ -56,7 +56,7 @@ export default function SettingsPage() {
   }, [status, router])
 
   useEffect(() => {
-    if (session?.user?.id) {
+    if ((session as any)?.user?.id) {
       loadUserPreferences()
     }
   }, [session])
@@ -226,7 +226,7 @@ export default function SettingsPage() {
               <h3 className="text-xl font-bold text-white mb-1">{session.user?.name}</h3>
               <p className="text-gray-400 mb-2">{session.user?.email}</p>
               <Link
-                href={`/profile/${session.user?.id}`}
+                href={`/profile/${(session as any).user?.id}`}
                 className="inline-flex items-center space-x-2 text-spotify-green hover:text-spotify-green/80 transition-colors"
               >
                 <Eye className="h-4 w-4" />

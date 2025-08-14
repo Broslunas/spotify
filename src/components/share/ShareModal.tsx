@@ -58,8 +58,6 @@ const ShareModal: React.FC<ShareModalProps> = ({
     
     try {
       const canvas = await html2canvas(shareRef.current, {
-        backgroundColor: null,
-        scale: 2,
         useCORS: true,
         allowTaint: true
       })

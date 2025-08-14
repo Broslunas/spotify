@@ -86,7 +86,7 @@ export default function DashboardPage() {
   }, [status, router])
 
   useEffect(() => {
-    if (session?.accessToken) {
+    if ((session as any)?.accessToken) {
       fetchSpotifyData()
     }
   }, [session, selectedTimeRange])
@@ -97,25 +97,24 @@ export default function DashboardPage() {
       // Fetch top tracks
       const tracksResponse = await fetch(`https://api.spotify.com/v1/me/top/tracks?time_range=${selectedTimeRange}&limit=10`, {
         headers: {
-          'Authorization': `Bearer ${session?.accessToken}`
+          'Authorization': `Bearer ${(session as any)?.accessToken}`
         }
       })
       const tracksData = await tracksResponse.json()
 
       // Fetch top artists
       const artistsResponse = await fetch(`https://api.spotify.com/v1/me/top/artists?time_range=${selectedTimeRange}&limit=10`, {
-        headers: {
-          'Authorization': `Bearer ${session?.accessToken}`
-        }
-      })
-      const artistsData = await artistsResponse.json()
+          headers: {
+            'Authorization': `Bearer ${(session as any)?.accessToken}`
+          }
+        })
+        const artistsData = await artistsResponse.json()
 
-      // Fetch recently played
-      const recentResponse = await fetch('https://api.spotify.com/v1/me/player/recently-played?limit=20', {
-        headers: {
-          'Authorization': `Bearer ${session?.accessToken}`
-        }
-      })
+        const recentResponse = await fetch('https://api.spotify.com/v1/me/player/recently-played?limit=10', {
+          headers: {
+            'Authorization': `Bearer ${(session as any)?.accessToken}`
+          }
+        })
       const recentData = await recentResponse.json()
 
       // Process data

@@ -48,7 +48,7 @@ export { connectDB as connectToDatabase }
 // Extend global type for mongoose caching
 declare global {
   var mongoose: {
-    conn: typeof mongoose | null
-    promise: Promise<typeof mongoose> | null
+    conn: any | null
+    promise: Promise<any> | null
   }
 }

@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { authOptions } from '@/lib/auth'
 import { connectToDatabase } from '@/lib/mongodb'
 import User from '@/models/User'
 import UserStats from '@/models/UserStats'
-
+import PlayHistory from '@/models/PlayHistory'
 interface SpotifyTrack {
   id: string
   name: string
@@ -34,9 +34,9 @@ const SPOTIFY_API_BASE = 'https://api.spotify.com/v1'
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession(authOptions as any)
     
-    if (!session?.user?.email || !session.accessToken) {
+    if (!session || !(session as any)?.user?.email || !(session as any).accessToken) {
       return NextResponse.json(
         { error: 'No autorizado' },
         { status: 401 }
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     await connectToDatabase()
     
     // Find user
-    const user = await User.findOne({ email: session.user.email })
+    const user = await User.findOne({ email: (session as any).user.email })
     
     if (!user) {
       return NextResponse.json(
@@ -62,19 +62,19 @@ export async function POST(request: NextRequest) {
       const [topTracksRes, topArtistsRes, recentTracksRes] = await Promise.all([
         fetch(`${SPOTIFY_API_BASE}/me/top/tracks?time_range=${timeRange}&limit=50`, {
           headers: {
-            'Authorization': `Bearer ${session.accessToken}`
+            'Authorization': `Bearer ${(session as any).accessToken}`
           }
         }),
         fetch(`${SPOTIFY_API_BASE}/me/top/artists?time_range=${timeRange}&limit=50`, {
-          headers: {
-            'Authorization': `Bearer ${session.accessToken}`
-          }
-        }),
-        fetch(`${SPOTIFY_API_BASE}/me/player/recently-played?limit=50`, {
-          headers: {
-            'Authorization': `Bearer ${session.accessToken}`
-          }
-        })
+            headers: {
+              'Authorization': `Bearer ${(session as any).accessToken}`
+            }
+          }),
+          fetch(`${SPOTIFY_API_BASE}/me/recently-played?limit=50`, {
+            headers: {
+              'Authorization': `Bearer ${(session as any).accessToken}`
+            }
+          })
       ])
       
       if (!topTracksRes.ok || !topArtistsRes.ok || !recentTracksRes.ok) {
@@ -125,7 +125,7 @@ export async function POST(request: NextRequest) {
       
       // Calculate top genres from artists
       const genreCount: { [key: string]: number } = {}
-      topArtists.forEach(artist => {
+      topArtists.forEach((artist: SpotifyArtist) => {
         artist.genres.forEach((genre: string) => {
           genreCount[genre] = (genreCount[genre] || 0) + 1
         })
@@ -151,7 +151,7 @@ export async function POST(request: NextRequest) {
       }
       
       // Calculate total listening time (simulated)
-      const totalMinutes = topTracks.reduce((total, track) => {
+      const totalMinutes = topTracks.reduce((total: number, track: any) => {
         return total + Math.floor((track.duration_ms / 1000 / 60) * (track.playCount || 1))
       }, 0)
       

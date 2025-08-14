@@ -24,7 +24,7 @@ export default function Navigation({ showActions = false, onShare, onExport }: N
   const navigationItems = [
     { href: '/', label: 'Inicio', icon: Home },
     { href: '/dashboard', label: 'Dashboard', icon: BarChart3, requiresAuth: true },
-    { href: `/profile/${session?.user?.id}`, label: 'Mi Perfil', icon: User, requiresAuth: true },
+    { href: `/profile/${(session as any)?.user?.id}`, label: 'Mi Perfil', icon: User, requiresAuth: true },
     { href: '/settings', label: 'Configuración', icon: Settings, requiresAuth: true }
   ]
 
@@ -84,7 +84,9 @@ export default function Navigation({ showActions = false, onShare, onExport }: N
                     icon={Share2}
                     onClick={onShare}
                     className="text-gray-300 hover:text-white"
-                  />
+                  >
+                    Compartir
+                  </Button>
                 )}
                 {onExport && (
                   <Button
@@ -93,7 +95,9 @@ export default function Navigation({ showActions = false, onShare, onExport }: N
                     icon={Download}
                     onClick={onExport}
                     className="text-gray-300 hover:text-white"
-                  />
+                  >
+                    Exportar
+                  </Button>
                 )}
               </div>
             )}
@@ -111,7 +115,7 @@ export default function Navigation({ showActions = false, onShare, onExport }: N
             {session ? (
               <div className="flex items-center space-x-3">
                 {/* User Avatar */}
-                <Link href={`/profile/${session.user?.id}`} className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
+                <Link href={`/profile/${(session as any).user?.id}`} className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
                   {session.user?.image ? (
                     <img
                       src={session.user.image}
@@ -136,7 +140,9 @@ export default function Navigation({ showActions = false, onShare, onExport }: N
                   onClick={handleSignOut}
                   className="text-gray-300 hover:text-red-400"
                   title="Cerrar sesión"
-                />
+                >
+                  Salir
+                </Button>
               </div>
             ) : (
               <Link href="/login">

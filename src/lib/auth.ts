@@ -1,8 +1,25 @@
-import { NextAuthOptions } from 'next-auth'
 import SpotifyProvider from 'next-auth/providers/spotify'
 import { MongoDBAdapter } from '@next-auth/mongodb-adapter'
 import { MongoClient } from 'mongodb'
 import { JWT } from 'next-auth/jwt'
+
+// Define NextAuthOptions type manually
+interface NextAuthOptions {
+  adapter?: any
+  providers: any[]
+  callbacks?: {
+    jwt?: (params: any) => Promise<any>
+    session?: (params: any) => Promise<any>
+  }
+  pages?: {
+    signIn?: string
+    error?: string
+  }
+  session?: {
+    strategy: 'jwt' | 'database'
+  }
+  secret?: string
+}
 
 const client = new MongoClient(process.env.MONGODB_URI!)
 const clientPromise = client.connect()
@@ -89,7 +106,7 @@ async function refreshAccessToken(token: ExtendedJWT): Promise<ExtendedJWT> {
       },
       body: new URLSearchParams({
         grant_type: 'refresh_token',
-        refresh_token: token.refreshToken,
+        refresh_token: token.refreshToken as string,
       }),
       method: 'POST',
     })

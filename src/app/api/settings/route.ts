@@ -8,7 +8,7 @@ import PlayHistory from '@/models/PlayHistory'
 
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession(authOptions as any)
     
     if (!session || !(session as any)?.user?.email) {
       return NextResponse.json(
@@ -54,7 +54,7 @@ export async function GET() {
 
 export async function PUT(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession(authOptions as any)
     
     if (!session || !(session as any)?.user?.email) {
       return NextResponse.json(
@@ -107,7 +107,7 @@ export async function PUT(request: NextRequest) {
 
 export async function DELETE() {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession(authOptions as any)
     
     if (!session || !(session as any)?.user?.email) {
       return NextResponse.json(
