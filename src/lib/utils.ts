@@ -42,7 +42,7 @@ export function getTimeRange(range: string): { start: Date; end: Date } {
   return { start, end }
 }
 
-export function generateShareableImage(data: any): Promise<string> {
+export function generateShareableImage(): Promise<string> {
   // This will be implemented later with html2canvas
   return Promise.resolve('')
 }
@@ -61,7 +61,7 @@ export function getGreeting(): string {
   return 'Buenas noches'
 }
 
-export function debounce<T extends (...args: any[]) => any>(
+export function debounce<T extends (...args: unknown[]) => unknown>(
   func: T,
   wait: number
 ): (...args: Parameters<T>) => void {

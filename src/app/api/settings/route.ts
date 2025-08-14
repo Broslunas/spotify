@@ -6,7 +6,7 @@ import User from '@/models/User'
 import UserStats from '@/models/UserStats'
 import PlayHistory from '@/models/PlayHistory'
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const session = await getServerSession(authOptions)
     
@@ -105,7 +105,7 @@ export async function PUT(request: NextRequest) {
   }
 }
 
-export async function DELETE(request: NextRequest) {
+export async function DELETE() {
   try {
     const session = await getServerSession(authOptions)
     

@@ -5,6 +5,31 @@ import { connectToDatabase } from '@/lib/mongodb'
 import User from '@/models/User'
 import UserStats from '@/models/UserStats'
 
+interface SpotifyTrack {
+  id: string
+  name: string
+  artists: Array<{ name: string }>
+  album: { name: string; images: Array<{ url: string }> }
+  duration_ms: number
+  external_urls: { spotify: string }
+  preview_url: string | null
+}
+
+interface SpotifyArtist {
+  id: string
+  name: string
+  genres: string[]
+  images: Array<{ url: string }>
+  external_urls: { spotify: string }
+  followers: { total: number }
+  popularity: number
+}
+
+interface RecentTrackItem {
+  track: SpotifyTrack
+  played_at: string
+}
+
 const SPOTIFY_API_BASE = 'https://api.spotify.com/v1'
 
 export async function POST(request: NextRequest) {
@@ -63,7 +88,7 @@ export async function POST(request: NextRequest) {
       ])
       
       // Process top tracks
-      const topTracks = topTracksData.items.map((track: any, index: number) => ({
+      const topTracks = topTracksData.items.map((track: SpotifyTrack) => ({
         id: track.id,
         name: track.name,
         artist: track.artists[0]?.name || 'Unknown Artist',
@@ -76,7 +101,7 @@ export async function POST(request: NextRequest) {
       }))
       
       // Process top artists
-      const topArtists = topArtistsData.items.map((artist: any, index: number) => ({
+      const topArtists = topArtistsData.items.map((artist: SpotifyArtist) => ({
         id: artist.id,
         name: artist.name,
         genres: artist.genres || [],
@@ -87,7 +112,7 @@ export async function POST(request: NextRequest) {
       }))
       
       // Process recent tracks
-      const recentTracks = recentTracksData.items.map((item: any) => ({
+      const recentTracks = recentTracksData.items.map((item: RecentTrackItem) => ({
         id: item.track.id,
         name: item.track.name,
         artist: item.track.artists[0]?.name || 'Unknown Artist',

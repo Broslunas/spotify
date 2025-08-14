@@ -4,7 +4,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { Music, TrendingUp, Clock, Users, Download, Share2, Settings, LogOut } from 'lucide-react'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 import { signOut } from 'next-auth/react'
 import Link from 'next/link'
 import { formatDuration, formatNumber } from '@/lib/utils'
@@ -35,6 +35,27 @@ interface Genre {
 interface TimeRange {
   label: string
   value: 'short_term' | 'medium_term' | 'long_term'
+}
+
+interface SpotifyTrack {
+  id: string
+  name: string
+  artists: Array<{ name: string }>
+  duration_ms: number
+  album: {
+    images: Array<{ url: string }>
+  }
+}
+
+interface SpotifyArtist {
+  id: string
+  name: string
+  genres: string[]
+  images: Array<{ url: string }>
+}
+
+interface SpotifyRecentItem {
+  track: SpotifyTrack
 }
 
 const timeRanges: TimeRange[] = [
@@ -98,7 +119,7 @@ export default function DashboardPage() {
       const recentData = await recentResponse.json()
 
       // Process data
-      const topTracks: Track[] = tracksData.items?.map((track: any, index: number) => ({
+      const topTracks: Track[] = tracksData.items?.map((track: SpotifyTrack, index: number) => ({
         id: track.id,
         name: track.name,
         artist: track.artists[0].name,
@@ -107,7 +128,7 @@ export default function DashboardPage() {
         image: track.album.images[0]?.url
       })) || []
 
-      const topArtists: Artist[] = artistsData.items?.map((artist: any, index: number) => ({
+      const topArtists: Artist[] = artistsData.items?.map((artist: SpotifyArtist, index: number) => ({
         id: artist.id,
         name: artist.name,
         playCount: 200 - index * 10, // Mock play count
@@ -115,7 +136,7 @@ export default function DashboardPage() {
         image: artist.images[0]?.url
       })) || []
 
-      const recentTracks: Track[] = recentData.items?.map((item: any) => ({
+      const recentTracks: Track[] = recentData.items?.map((item: SpotifyRecentItem) => ({
         id: item.track.id,
         name: item.track.name,
         artist: item.track.artists[0].name,

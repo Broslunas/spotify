@@ -6,6 +6,46 @@ import User from '@/models/User'
 import UserStats from '@/models/UserStats'
 import PlayHistory from '@/models/PlayHistory'
 
+interface ExportData {
+  user: {
+    name?: string
+    email?: string
+    country?: string
+    product?: string
+    followers?: number
+    createdAt?: string
+  }
+  playHistory: Array<{
+    trackName?: string
+    artistName?: string
+    albumName?: string
+    msPlayed?: number
+    endTime?: string
+    reasonStart?: string
+    reasonEnd?: string
+    shuffle?: boolean
+    skipped?: boolean
+    offline?: boolean
+    incognitoMode?: boolean
+  }>
+  stats: Array<{
+    timeRange: string
+    topTracks: Array<{
+      name?: string
+      artists?: Array<{ name: string }>
+      album?: { name: string }
+      playCount?: number
+      duration_ms?: number
+    }>
+    topArtists: Array<{
+      name?: string
+      genres?: string[]
+      followers?: { total: number }
+      popularity?: number
+    }>
+  }>
+}
+
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
@@ -104,7 +144,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-function convertToCSV(data: any): string {
+function convertToCSV(data: ExportData): string {
   const csvRows: string[] = []
   
   // Add user info
@@ -122,7 +162,7 @@ function convertToCSV(data: any): string {
   csvRows.push('PLAY HISTORY')
   csvRows.push('Track Name,Artist Name,Album Name,Ms Played,End Time,Reason Start,Reason End,Shuffle,Skipped,Offline,Incognito Mode')
   
-  data.playHistory.forEach((play: any) => {
+  data.playHistory.forEach((play) => {
     csvRows.push([
       `"${play.trackName || ''}"`,
       `"${play.artistName || ''}"`,
@@ -141,11 +181,11 @@ function convertToCSV(data: any): string {
   csvRows.push('')
   
   // Add top tracks for each time range
-  data.stats.forEach((stat: any) => {
+  data.stats.forEach((stat) => {
     csvRows.push(`TOP TRACKS - ${stat.timeRange.toUpperCase()}`)
     csvRows.push('Rank,Track Name,Artist,Album,Play Count,Duration (ms)')
     
-    stat.topTracks.forEach((track: any, index: number) => {
+    stat.topTracks.forEach((track, index: number) => {
       csvRows.push([
         index + 1,
         `"${track.name || ''}"`,

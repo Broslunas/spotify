@@ -5,6 +5,19 @@ import { connectToDatabase } from '@/lib/mongodb'
 import User from '@/models/User'
 import UserStats from '@/models/UserStats'
 
+interface ShareData {
+  user: {
+    name?: string
+    image?: string
+  }
+  timeRange: string
+  theme: string
+  generatedAt: string
+  title?: string
+  subtitle?: string
+  data?: unknown
+}
+
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
@@ -44,7 +57,7 @@ export async function POST(request: NextRequest) {
     }
     
     // Generate share data based on type
-    let shareData: any = {
+    const shareData: ShareData = {
       user: {
         name: user.name,
         image: user.image
