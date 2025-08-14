@@ -1,15 +1,44 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { authOptions } from '@/lib/auth'
 import { connectToDatabase } from '@/lib/mongodb'
 import User from '@/models/User'
 import UserStats from '@/models/UserStats'
+
+interface TrackData {
+  id: string
+  name: string
+  artist: string
+  album?: string
+  playCount: number
+  duration_ms: number
+  image?: string
+  played_at?: string
+  external_urls?: any
+  preview_url?: string
+}
+
+interface ArtistData {
+  id: string
+  name: string
+  playCount: number
+  genres: string[]
+  image?: string
+  external_urls?: any
+  followers?: any
+}
+
+interface GenreData {
+  name: string
+  count: number
+  percentage: number
+}
 
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     
-    if (!session?.user?.email) {
+    if (!session || !(session as any)?.user?.email) {
       return NextResponse.json(
         { error: 'No autorizado' },
         { status: 401 }
@@ -19,7 +48,7 @@ export async function GET(request: NextRequest) {
     await connectToDatabase()
     
     // Find user
-    const user = await User.findOne({ email: session.user.email })
+    const user = await User.findOne({ email: (session as any).user.email })
     
     if (!user) {
       return NextResponse.json(
@@ -62,7 +91,7 @@ export async function GET(request: NextRequest) {
     
     // Format response
     const stats = {
-      topTracks: userStats.topTracks.slice(0, limit).map(track => ({
+      topTracks: userStats.topTracks.slice(0, limit).map((track: TrackData) => ({
         id: track.id,
         name: track.name,
         artist: track.artist,
@@ -73,7 +102,7 @@ export async function GET(request: NextRequest) {
         external_urls: track.external_urls,
         preview_url: track.preview_url
       })),
-      topArtists: userStats.topArtists.slice(0, limit).map(artist => ({
+      topArtists: userStats.topArtists.slice(0, limit).map((artist: ArtistData) => ({
         id: artist.id,
         name: artist.name,
         playCount: artist.playCount || 0,
@@ -82,12 +111,12 @@ export async function GET(request: NextRequest) {
         external_urls: artist.external_urls,
         followers: artist.followers
       })),
-      topGenres: userStats.topGenres.slice(0, limit).map(genre => ({
+      topGenres: userStats.topGenres.slice(0, limit).map((genre: GenreData) => ({
         name: genre.name,
         count: genre.count,
         percentage: genre.percentage
       })),
-      recentTracks: userStats.recentTracks.slice(0, 20).map(track => ({
+      recentTracks: userStats.recentTracks.slice(0, 20).map((track: TrackData) => ({
         id: track.id,
         name: track.name,
         artist: track.artist,
@@ -125,7 +154,7 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     
-    if (!session?.user?.email) {
+    if (!session || !(session as any)?.user?.email) {
       return NextResponse.json(
         { error: 'No autorizado' },
         { status: 401 }
@@ -135,7 +164,7 @@ export async function POST(request: NextRequest) {
     await connectToDatabase()
     
     // Find user
-    const user = await User.findOne({ email: session.user.email })
+    const user = await User.findOne({ email: (session as any).user.email })
     
     if (!user) {
       return NextResponse.json(
