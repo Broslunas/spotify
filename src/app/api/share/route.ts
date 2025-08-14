@@ -1,9 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { authOptions } from '@/lib/auth'
 import { connectToDatabase } from '@/lib/mongodb'
 import User from '@/models/User'
 import UserStats from '@/models/UserStats'
+
+interface TrackData {
+  name: string
+  artist: string
+  playCount?: number
+  image?: string
+}
+
+interface ArtistData {
+  name: string
+  genres: string[]
+  playCount?: number
+  image?: string
+}
+
+interface GenreData {
+  name: string
+  count: number
+  percentage: number
+}
 
 interface ShareData {
   user: {
@@ -16,13 +36,27 @@ interface ShareData {
   title?: string
   subtitle?: string
   data?: unknown
+  items?: Array<{
+    rank: number
+    name: string
+    artist: string
+    playCount?: number
+    image?: string
+  }>
+  summary?: {
+    totalMinutes: number
+    topTrack: TrackData
+    topArtist: ArtistData
+    topGenre: GenreData
+    audioFeatures: any
+  }
 }
 
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     
-    if (!session?.user?.email) {
+    if (!session || !(session as any)?.user?.email) {
       return NextResponse.json(
         { error: 'No autorizado' },
         { status: 401 }
@@ -32,7 +66,7 @@ export async function POST(request: NextRequest) {
     await connectToDatabase()
     
     // Find user
-    const user = await User.findOne({ email: session.user.email })
+    const user = await User.findOne({ email: (session as any).user.email })
     
     if (!user) {
       return NextResponse.json(
@@ -71,7 +105,7 @@ export async function POST(request: NextRequest) {
       case 'top-tracks':
         shareData.title = `Mis canciones más escuchadas`
         shareData.subtitle = getTimeRangeLabel(timeRange)
-        shareData.items = userStats.topTracks.slice(0, 10).map((track, index) => ({
+        shareData.items = userStats.topTracks.slice(0, 10).map((track: TrackData, index: number) => ({
           rank: index + 1,
           name: track.name,
           artist: track.artist,
@@ -83,7 +117,7 @@ export async function POST(request: NextRequest) {
       case 'top-artists':
         shareData.title = `Mis artistas más escuchados`
         shareData.subtitle = getTimeRangeLabel(timeRange)
-        shareData.items = userStats.topArtists.slice(0, 10).map((artist, index) => ({
+        shareData.items = userStats.topArtists.slice(0, 10).map((artist: ArtistData, index: number) => ({
           rank: index + 1,
           name: artist.name,
           genres: artist.genres.slice(0, 3),
@@ -95,7 +129,7 @@ export async function POST(request: NextRequest) {
       case 'top-genres':
         shareData.title = `Mis géneros favoritos`
         shareData.subtitle = getTimeRangeLabel(timeRange)
-        shareData.items = userStats.topGenres.slice(0, 10).map((genre, index) => ({
+        shareData.items = userStats.topGenres.slice(0, 10).map((genre: GenreData, index: number) => ({
           rank: index + 1,
           name: genre.name,
           count: genre.count,

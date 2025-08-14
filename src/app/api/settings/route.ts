@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { authOptions } from '@/lib/auth'
 import { connectToDatabase } from '@/lib/mongodb'
 import User from '@/models/User'
 import UserStats from '@/models/UserStats'
@@ -10,7 +10,7 @@ export async function GET() {
   try {
     const session = await getServerSession(authOptions)
     
-    if (!session?.user?.email) {
+    if (!session || !(session as any)?.user?.email) {
       return NextResponse.json(
         { error: 'No autorizado' },
         { status: 401 }
@@ -20,7 +20,7 @@ export async function GET() {
     await connectToDatabase()
     
     // Find user
-    const user = await User.findOne({ email: session.user.email })
+    const user = await User.findOne({ email: (session as any).user.email })
     
     if (!user) {
       return NextResponse.json(
@@ -56,7 +56,7 @@ export async function PUT(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     
-    if (!session?.user?.email) {
+    if (!session || !(session as any)?.user?.email) {
       return NextResponse.json(
         { error: 'No autorizado' },
         { status: 401 }
@@ -70,7 +70,7 @@ export async function PUT(request: NextRequest) {
     
     // Update user settings
     const updatedUser = await User.findOneAndUpdate(
-      { email: session.user.email },
+      { email: (session as any).user.email },
       {
         ...(theme && { theme }),
         ...(typeof isPublic === 'boolean' && { isPublic }),
@@ -109,7 +109,7 @@ export async function DELETE() {
   try {
     const session = await getServerSession(authOptions)
     
-    if (!session?.user?.email) {
+    if (!session || !(session as any)?.user?.email) {
       return NextResponse.json(
         { error: 'No autorizado' },
         { status: 401 }
@@ -119,7 +119,7 @@ export async function DELETE() {
     await connectToDatabase()
     
     // Find user
-    const user = await User.findOne({ email: session.user.email })
+    const user = await User.findOne({ email: (session as any).user.email })
     
     if (!user) {
       return NextResponse.json(

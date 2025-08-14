@@ -3,14 +3,39 @@ import { connectToDatabase } from '@/lib/mongodb'
 import User from '@/models/User'
 import UserStats from '@/models/UserStats'
 
+interface TrackData {
+  id: string
+  name: string
+  artist: string
+  playCount?: number
+  duration_ms?: number
+  image?: string
+  played_at?: string
+}
+
+interface ArtistData {
+  id: string
+  name: string
+  playCount?: number
+  genres?: string[]
+  image?: string
+}
+
+interface GenreData {
+  name: string
+  count: number
+  percentage?: number
+}
+
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectToDatabase()
     
-    const userId = params.id
+    const resolvedParams = await params
+    const userId = resolvedParams.id
     
     // Find user
     const user = await User.findById(userId).select(
@@ -59,7 +84,7 @@ export async function GET(
       isPublic: user.isPublic,
       privacy,
       stats: {
-        topTracks: privacy.showTopTracks ? userStats.topTracks.map(track => ({
+        topTracks: privacy.showTopTracks ? userStats.topTracks.map((track: TrackData) => ({
           id: track.id,
           name: track.name,
           artist: track.artist,
@@ -67,20 +92,20 @@ export async function GET(
           duration: track.duration_ms,
           image: track.image
         })) : [],
-        topArtists: privacy.showTopArtists ? userStats.topArtists.map(artist => ({
+        topArtists: privacy.showTopArtists ? userStats.topArtists.map((artist: ArtistData) => ({
           id: artist.id,
           name: artist.name,
           playCount: artist.playCount || 0,
           genres: artist.genres,
           image: artist.image
         })) : [],
-        topGenres: privacy.showTopGenres ? userStats.topGenres.map(genre => ({
+        topGenres: privacy.showTopGenres ? userStats.topGenres.map((genre: GenreData) => ({
           name: genre.name,
           count: genre.count,
           percentage: genre.percentage
         })) : [],
         totalMinutes: privacy.showListeningTime ? userStats.totalMinutes || 0 : 0,
-        recentTracks: privacy.showRecentTracks ? userStats.recentTracks.map(track => ({
+        recentTracks: privacy.showRecentTracks ? userStats.recentTracks.map((track: TrackData) => ({
           id: track.id,
           name: track.name,
           artist: track.artist,

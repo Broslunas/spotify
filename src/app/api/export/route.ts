@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
-import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { authOptions } from '@/lib/auth'
 import { connectToDatabase } from '@/lib/mongodb'
 import User from '@/models/User'
 import UserStats from '@/models/UserStats'
@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     
-    if (!session?.user?.email) {
+    if (!session || !(session as any)?.user?.email) {
       return NextResponse.json(
         { error: 'No autorizado' },
         { status: 401 }
@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
     await connectToDatabase()
     
     // Find user
-    const user = await User.findOne({ email: session.user.email })
+    const user = await User.findOne({ email: (session as any).user.email })
     
     if (!user) {
       return NextResponse.json(
@@ -188,11 +188,11 @@ function convertToCSV(data: ExportData): string {
     stat.topTracks.forEach((track, index: number) => {
       csvRows.push([
         index + 1,
-        `"${track.name || ''}"`,
-        `"${track.artist || ''}"`,
-        `"${track.album || ''}"`,
+        `"${track.name || ''}"`,,
+        `"${track.artists?.[0]?.name || ''}"`,,
+        `"${track.album?.name || ''}"`,,
         track.playCount || 0,
-        track.duration || 0
+        track.duration_ms || 0
       ].join(','))
     })
     
