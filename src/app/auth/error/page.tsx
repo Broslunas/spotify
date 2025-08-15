@@ -2,7 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { GlassContainer } from "@/components/ui/GlassContainer";
+import { GlassContainer } from "@/components/layout/GlassContainer";
 
 const errorMessages: Record<string, string> = {
     Configuration: "There is a problem with the server configuration.",
@@ -19,7 +19,7 @@ export default function AuthError() {
     return (
         <div className="min-h-screen bg-gradient-to-br from-red-400 via-pink-500 to-purple-600 flex items-center justify-center p-4">
             <div className="w-full max-w-md">
-                <GlassContainer className="p-8 text-center" blur="lg" opacity={0.15}>
+                <GlassContainer className="p-8 text-center" blur="lg" opacity="medium">
                     <div className="mb-8">
                         <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-red-500 flex items-center justify-center">
                             <svg

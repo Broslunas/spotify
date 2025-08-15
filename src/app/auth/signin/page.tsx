@@ -3,7 +3,7 @@
 import { signIn, getSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { GlassContainer } from "@/components/ui/GlassContainer";
+import { GlassContainer } from "@/components/layout/GlassContainer";
 
 export default function SignIn() {
     const router = useRouter();
@@ -31,7 +31,7 @@ export default function SignIn() {
     return (
         <div className="min-h-screen bg-gradient-to-br from-green-400 via-blue-500 to-purple-600 flex items-center justify-center p-4">
             <div className="w-full max-w-md">
-                <GlassContainer className="p-8 text-center" blur="lg" opacity={0.15}>
+                <GlassContainer className="p-8 text-center" blur="lg" opacity="medium">
                     <div className="mb-8">
                         <h1 className="text-3xl font-bold text-white mb-2">
                             Spotify Dashboard
